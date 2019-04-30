@@ -52,7 +52,7 @@ project      = st.lookup('arriscope/ARRIScope Tissue');
 %% Choose a session and acquisition 
 
 % Keep the double quotes or else Flywheel will read the string as a number.
-thisSession  = project.sessions.findOne('label="20190412"');
+thisSession  = project.sessions.findOne('label="20190424"');
 thisAcq      = thisSession.acquisitions.findOne('label=Bone');
 disp(thisAcq.label); 
 

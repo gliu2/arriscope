@@ -60,21 +60,23 @@ dir_csv2 = dir(fullfile(selpath2, '*.png'));
 numfiles2 = length(dir_csv2);
 
 %% Choose a session and acquisition 
-DATE = '"20190424"';
+DATE = '"20190429"';
 
 % tissues = cell(1,1);
 % tissues{1} = 'Skin';
 % % TISSUE = 'Cartilage';
 
-tissues = cell(8,1);
-tissues{1} = 'Bone';
-tissues{2} = 'Dura';
-tissues{3} = 'Fascia';
-tissues{4} = 'Fat';
-tissues{5} = 'Muscle';
-tissues{6} = 'Nerve';
-tissues{7} = 'Parotid';
-tissues{8} = 'Vein';
+% tissues = cell(8,1);
+% tissues{1} = 'Bone';
+% tissues{2} = 'Dura';
+% tissues{3} = 'Fascia';
+% tissues{4} = 'Fat';
+% tissues{5} = 'Muscle';
+% tissues{6} = 'Nerve';
+% tissues{7} = 'Parotid';
+% tissues{8} = 'Vein';
+tissues = cell(1,1);
+tissues{1} = 'PerichondriumWCartilage';
 
 num_tissues = length(tissues);
 for i = 1:num_tissues

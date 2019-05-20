@@ -60,13 +60,33 @@ dir_csv2 = dir(fullfile(selpath2, '*.png'));
 numfiles2 = length(dir_csv2);
 
 %% Choose a session and acquisition 
-DATE = '"20190429"';
+DATE = '"20190515"';
 
 % tissues = cell(1,1);
 % tissues{1} = 'Skin';
 % % TISSUE = 'Cartilage';
 
+TISSUE_CLASSES = ["Artery", ...
+    "Bone", ...
+    "Cartilage", ...
+    "Dura", ...
+    "Fascia", ...
+    "Fat", ....
+    "Muscle", ...
+    "Nerve", ...
+    "Skin", ...
+    "Parotid", ...
+    "PerichondriumWCartilage", ...
+    "Vein"];
+
+num_tissues = length(TISSUE_CLASSES);
+tissues = cell(num_tissues, 1);
+for i=1:num_tissues
+    tissues{i} = char(TISSUE_CLASSES(i));
+end
+
 % tissues = cell(8,1);
+% tissues{1} = 'Bone';
 % tissues{1} = 'Bone';
 % tissues{2} = 'Dura';
 % tissues{3} = 'Fascia';
@@ -75,10 +95,10 @@ DATE = '"20190429"';
 % tissues{6} = 'Nerve';
 % tissues{7} = 'Parotid';
 % tissues{8} = 'Vein';
-tissues = cell(1,1);
-tissues{1} = 'PerichondriumWCartilage';
+% tissues = cell(1,1);
+% tissues{1} = 'PerichondriumWCartilage';
 
-num_tissues = length(tissues);
+% num_tissues = length(tissues);
 for i = 1:num_tissues
     TISSUE = tissues{i};
     disp([' Analyzing tissue ', num2str(i), ' out of ', num2str(num_tissues), ' - ', TISSUE])
@@ -117,7 +137,8 @@ for i = 1:num_tissues
     % Find tissue mask in selected folder, if exists
     for nn = 1:numfiles2
         filename = dir_csv2(nn).name;
-        if startsWith(filename, TISSUE)
+%         if startsWith(filename, TISSUE)
+        if contains(filename, TISSUE)
             mask_path = fullfile(selpath2, filename);
             disp(['Found mask path: ', mask_path])
             break

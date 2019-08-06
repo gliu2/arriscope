@@ -7,7 +7,7 @@
 % Last edit: 8/5/2019
 % Dependencies: none
 
-DATE = '20190604';
+DATE = '20190520';
 TISSUETYPE = 'muscle'; 
 
 % Load white paper image
@@ -51,12 +51,12 @@ end
 
 disp('Max vals')
 for k=1:21
-    thisim=arriRGB_21channels(:,:,k); thisim=thisim(logical(mask1(:,:,1))); disp(max(thisim))
+    thisim=arriRGB_21channels(:,:,k); thisim=thisim(logical(mask1(:,:,1))); disp(nanmax(thisim(~isinf(thisim))))
 end
 
 disp('99th percentile')
 for k=1:21
-    thisim=arriRGB_21channels(:,:,k); thisim=thisim(logical(mask1(:,:,1))); disp(prctile(thisim, 99))
+    thisim=arriRGB_21channels(:,:,k); thisim=thisim(logical(mask1(:,:,1))); disp(prctile(thisim(~isinf(thisim)), 99))
 end
 
 disp('Mean')

@@ -1,7 +1,8 @@
 %% import_ari2mat_GSL.m
 %
-% Purpose: Import ari files from Flywheel for given session and acquisition, and
-% convert ari raw files to .mat files. One MAT file per tissue type. 
+% Purpose: Import ari files from Flywheel for given session (i.e. date) 
+% and all its acquisitions (i.e. illumination lights), and
+% convert ari raw files to .mat files of RGB data. One MAT file per tissue type. 
 % MAT files should contain one array each, with 21-channel image of 7
 % illumination types combined:
 %
@@ -25,8 +26,8 @@
 %
 % See also s_arriROISelect.m
 %
-% Last edit GSL: 5/20/2019
-% Dependencies: correct_ari.m, extract_ROImask.m
+% Last edit GSL: 8/5/2019
+% Dependencies: arriRead.m, correct_ari.m
 
 
 %% initialize ISET
@@ -44,20 +45,23 @@ project      = st.lookup('arriscope/ARRIScope Tissue');
 
 
 %% Choose a session and acquisition 
-DATE = '"20190515"';
+DATE = '"20190604"';
 
-TISSUE_CLASSES = ["Artery", ...
-    "Bone", ...
-    "Cartilage", ...
-    "Dura", ...
-    "Fascia", ...
-    "Fat", ....
-    "Muscle", ...
-    "Nerve", ...
-    "Skin", ...
-    "Parotid", ...
-    "PerichondriumWCartilage", ...
-    "Vein"];
+TISSUE_CLASSES = [
+%     "Artery"
+%     "Bone"
+%     "Cartilage"
+%     "Dura"
+%     "Fascia"
+%     "Fat"
+%     "Muscle"
+%     "Nerve"
+%     "Parotid"
+%     "PerichondriumWCartilage"
+%     "Skin"
+%     "Vein"
+    "WhitePaper"
+    ];
 
 num_tissues = length(TISSUE_CLASSES);
 tissues = cell(num_tissues, 1);
@@ -67,7 +71,7 @@ end
 
 for i = 1:num_tissues
     TISSUE = tissues{i};
-    disp([' Analyzing tissue ', num2str(i), ' out of ', num2str(num_tissues), ' - ', TISSUE])
+    disp(['Working on tissue ', num2str(i), ' out of ', num2str(num_tissues), ' - ', TISSUE])
 
     % Keep the double quotes or else Flywheel will read the string as a number.
     thisSession  = project.sessions.findOne(['label=', DATE]);
@@ -81,7 +85,7 @@ for i = 1:num_tissues
 
     % Find out the filenames in the zip archive
     zipInfo = thisAcq.getFileZipInfo(zipFile{1}.name);
-    stPrint(zipInfo.members,'path')
+    fileOrder = stPrint(zipInfo.members,'path'); % Display filenames in zip archive
 
     %% Unzip all the files
     % make 'local' folder if doesn't exist
@@ -94,9 +98,6 @@ for i = 1:num_tissues
     arriZipFile.download(zipArchive);
     unzip(zipArchive,thisAcq.label);
     disp('Downloaded and unzipped spd data');
-
-
-
 
     %% GSL added 4-29-2019: Read the arri image and extract the ROI 
     %   List of 7 (previously 8) light stimuli in order:
@@ -123,8 +124,8 @@ for i = 1:num_tissues
     ip = ipCreate;
     % Histogram window
 
-    % There should be 8 files in zip, one per light stimulus
-    NUM_LIGHTS = 8;
+    % There should be 7 files in zip, one per light stimulus
+    NUM_LIGHTS = 7;
     if nFiles ~= NUM_LIGHTS
         disp(['Warning: there are ', num2str(nFiles), ' light stimuli instead of ', num2str(NUM_LIGHTS), ...
             ' based on number of files found in ZIP folder.'])
@@ -132,20 +133,36 @@ for i = 1:num_tissues
     % Store RGB values for each light stimulus, then concatenate to form
     % feature matrix for image pixels
     arriRGB_21channels = []; % Combined image matrix of size (h, w, 21) from 7 RGB light stimuli images
-
-    % For each light stimulus
-    for ii = 1:nFiles
-%         entryName = zipInfo.members{ii}.path;
-        entryName = filesUnzipped(ii).name;
-        disp(['Working on light stimulus ', num2str(ii), ' out of ', num2str(nFiles), ': ', entryName, ' ...'])
+    for ii = 1:nFiles % iterate over illumination lights
+        entryName = filesUnzipped(ii).name; % Name of illumination light
+        
+        % Skip "whitemix" illumination if present (on and before 4/24/2019)
+        if contains(entryName, 'mix')
+            disp('  Skip white mix')
+            continue
+        end
+        % Skip "ambient" illumination if present (white paper; on and before 4/24/2019?)
+        if contains(entryName, 'ambient')
+            disp('  Skip ambient')
+            continue
+        end
+        
+        % Download ari raw data for this illumination
+        disp(['  Importing illumination ', num2str(ii), ' out of ', num2str(nFiles), ': ', entryName, ' ...'])
         outName = fullfile(arriRootPath,'local',thisAcq.label,entryName);
         thisAcq.downloadFileZipMember(zipArchive,entryName,outName);
+        
+        % Import RGB image from ari raw data
         arriRGB = arriRead(outName);
 
         % Extract ROI from corrected L eye image
         [arriRGB_leftCorrected, ~] = correct_ari(arriRGB);
-        arriRGB_21channels = cat(3,arriRGB_21channels, arriRGB_leftCorrected);
+        arriRGB_21channels = cat(3,arriRGB_21channels, arriRGB_leftCorrected); % size (1248, 2198, 21)
     end
+    
+    % Crop RGB raw data to center rectangle of .ari image (1248x2198x21) to
+    % match mask TIFF image ROI (1080x1920x21)
+    arriRGB_21channels = arriRGB_21channels(85:1164, 140:2059, :); % size (1080, 1920, 21)
 
     %% Save out the data from all the measurements from a given specimen
     %
@@ -168,7 +185,6 @@ for i = 1:num_tissues
     %}
     sessionLabel = thisSession.label;
     acquisitionLabel  = thisAcq.label;
-    fileOrder = stPrint(zipInfo.members,'path');
     outFile = fullfile(arriRootPath,'local',sprintf('%s-%s_GSL',sessionLabel,acquisitionLabel));
     % save(outFile, 'meanRGB','stdRGB','acquisitionLabel','sessionLabel','fileOrder','rect');
     save(outFile, 'arriRGB_21channels','acquisitionLabel','sessionLabel','fileOrder','class_label', '-v7.3');

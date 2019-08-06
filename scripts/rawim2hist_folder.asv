@@ -23,7 +23,7 @@
 % https://cs.stanford.edu/~ermon/papers/cropyield_AAAI17.pdf
 %
 % Last edit GSL: 8/6/2019
-% Dependencies: rawim2hist.m
+% Dependencies: none
 
 % Tissue types hard-coded
 TISSUE_CLASSES = [
@@ -99,7 +99,6 @@ for k=1:num_sessions
     end
 end
 
-disp('Save histograms to alltissue_hist.mat ...')
 save('alltissue_hist.mat', alltissue_hist)
 
 disp('Done.')

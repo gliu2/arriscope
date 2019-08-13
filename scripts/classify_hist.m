@@ -20,7 +20,7 @@
 %             Row corresponds to tissue index in TISSUE_CLASSES:
 %
 % Last edit GSL: 8/6/2019
-% Dependencies: none
+% Dependencies: none (MATLAB Bioinformatics Toolbox for crossvalind)
 
 % Tissue types hard-coded
 TISSUE_CLASSES = [
@@ -54,22 +54,26 @@ p = plotconfusion(y_onehot, y_hat, 'Softmax (No-Holdout)');
 p.CurrentAxes.YTickLabel = tissues_pad;
 p.CurrentAxes.XTickLabel = tissues_pad;
 
-% Cross-validate
+%% Cross-validate
 K_FOLDS = 10;
-
 m = size(X,2);
-partitions = 1:floor(m/K_FOLDS):m;
-partitions(end) = m+1;
 
-X_shuffled = X(:, randperm(m)); % permute columns
+indices = crossvalind('Kfold', m, K_FOLDS);
+y_hat_i = cell(K_FOLDS, 1);
+yval
 for i=1:K_FOLDS
-    if i==1
-        Xtrain = X_shuffled(:, partitions(i):partitions(i+1)-1);
-    elseif i==K_FOLDS
-%         Xtrain = X_shuffled(:, partitions(i):partitions(i+1)-1);
-    else
+    Xtrain = X(:, indices~=i);
+    ytrain = y_onehot(:, indices~=i);
+    Xval = X(:, indices==i);
+    yval = y_onehot(:, indices==i);
     
-    end
+    net_i = trainSoftmaxLayer(Xtrain, ytrain);
+    y_hat_i{i} = net_i(Xval);
     
-    Xval
+    
 end
+
+% partitions = 1:floor(m/K_FOLDS):m;
+% partitions(end) = m+1;
+
+% X_shuffled = X(:, randperm(m)); % permute columns

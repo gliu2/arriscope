@@ -15,6 +15,8 @@
 %           corresponding to tissue.
 %        im_whitepaper, image matrix of size (height, width, d) of white
 %           paper 
+%        n_bins, number of bins (int) [optional]
+% 
 % Output: h, histogram vector of size (b, d) where b is number of bins.
 %
 % Reference:
@@ -22,11 +24,15 @@
 % Data" (2017)
 % https://cs.stanford.edu/~ermon/papers/cropyield_AAAI17.pdf
 %
-% Last edit GSL: 8/6/2019
+% Last edit GSL: 8/13/2019
 % Dependencies: none
 
-function h = rawim2hist(im, mask, im_whitepaper)
-N_BINS = 100; % number of bins for histogram; fine-tune this hyperparameter
+function h = rawim2hist(im, mask, im_whitepaper, varargin)
+if nargin==3
+    N_BINS = 100; % number of bins for histogram; fine-tune this hyperparameter
+else
+    N_BINS = varargin{1};
+end
 
 d = size(im, 3); % # spectral bands i.e. channels
 

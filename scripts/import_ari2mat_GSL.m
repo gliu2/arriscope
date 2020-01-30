@@ -45,22 +45,22 @@ project      = st.lookup('arriscope/ARRIScope Tissue');
 
 
 %% Choose a session and acquisition 
-DATE = '"20190604"';
+DATE = '"20190412"';
 
 TISSUE_CLASSES = [
-%     "Artery"
-%     "Bone"
-%     "Cartilage"
-%     "Dura"
-%     "Fascia"
-%     "Fat"
-%     "Muscle"
-%     "Nerve"
+    "Artery"
+    "Bone"
+    "Cartilage"
+    "Dura"
+    "Fascia"
+    "Fat"
+    "Muscle"
+    "Nerve"
 %     "Parotid"
-%     "PerichondriumWCartilage"
-%     "Skin"
+    "PerichondriumWCartilage"
+    "Skin"
 %     "Vein"
-    "WhitePaper"
+%     "WhitePaper"
     ];
 
 num_tissues = length(TISSUE_CLASSES);

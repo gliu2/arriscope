@@ -42,10 +42,15 @@ tissues = cell(num_tissues, 1);
 for i=1:num_tissues
     tissues{i} = char(TISSUE_CLASSES(i));
 end
+tissues_cat = categorical(TISSUE_CLASSES);
 
 % add empty entry to end for confusion matrix plot
 tissues_pad = tissues;
 tissues_pad{end+1} = [];
+
+%% Load data
+% obtain "alltissue_hist" variable from output of rawim2hist_folder.m
+[X, y, y_onehot] = hist2ml(alltissue_hist);
 
 %% Train softmax regression
 net = trainSoftmaxLayer(X, y_onehot);
@@ -60,20 +65,32 @@ m = size(X,2);
 
 indices = crossvalind('Kfold', m, K_FOLDS);
 y_hat_i = cell(K_FOLDS, 1);
-yval
+C_i = cell(K_FOLDS, 1);
+y_pred_all = zeros(1, m);
 for i=1:K_FOLDS
-    Xtrain = X(:, indices~=i);
-    ytrain = y_onehot(:, indices~=i);
-    Xval = X(:, indices==i);
-    yval = y_onehot(:, indices==i);
+    disp(['Working on fold ', num2str(i), ' out of ', num2str(K_FOLDS)]);
+    test = (indices == i); 
+    train = ~test;
     
-    net_i = trainSoftmaxLayer(Xtrain, ytrain);
-    y_hat_i{i} = net_i(Xval);
+%     %Multispectral classification
+%     imtype = 'Multispectral';
+%     net = trainSoftmaxLayer(X(:,train), y_onehot(:,train));
+%     y_hat_i{i} = net(X(:,test));
     
+    %RGB Classification
+    imtype = 'RGB';
+    net = trainSoftmaxLayer(X(1:300,train), y_onehot(:,train));
+    y_hat_i{i} = net(X(1:300,test));
     
+    % Compile confusion matrices
+    [~, y_pred_i] = max(y_hat_i{i}, [], 1);
+    y_pred_all(test) = y_pred_i;
+    C_i{i} = confusionmat(y(test), y_pred_i);
 end
 
-% partitions = 1:floor(m/K_FOLDS):m;
-% partitions(end) = m+1;
-
-% X_shuffled = X(:, randperm(m)); % permute columns
+% Display confusion matrix
+C_all = confusionmat(y, y_pred_all);
+figure
+cc = confusionchart(C_all, tissues_cat, 'RowSummary','row-normalized','ColumnSummary','column-normalized');
+acc = sum(diag(C_all))/sum(C_all, 'all');
+title([imtype, ' Acc ', num2str(acc)])

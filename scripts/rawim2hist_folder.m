@@ -22,8 +22,11 @@
 % Data" (2017)
 % https://cs.stanford.edu/~ermon/papers/cropyield_AAAI17.pdf
 %
-% Last edit GSL: 8/6/2019
+% Last edit GSL: 8/13/2019
 % Dependencies: rawim2hist.m
+
+% Hyper-parameters to fine tune
+N_BINS = 100;
 
 % Tissue types hard-coded
 TISSUE_CLASSES = [
@@ -95,11 +98,11 @@ for k=1:num_sessions
         mask = imread(fullfile(mask_path, session, mask_listing.name));
         
         % Get histogram from raw image
-        alltissue_hist{j, k} = rawim2hist(im, mask, im_whitepaper);
+        alltissue_hist{j, k} = rawim2hist(im, mask, im_whitepaper, N_BINS);
     end
 end
 
 disp('Save histograms to alltissue_hist.mat ...')
-save('alltissue_hist.mat', alltissue_hist)
+save('alltissue_hist_bins200.mat', 'alltissue_hist')
 
 disp('Done.')

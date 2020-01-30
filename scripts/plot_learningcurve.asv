@@ -1,0 +1,15 @@
+[file,path] = uigetfile;
+A = readmatrix(fullfile(path, file));
+
+train_acc = A(1:5:end, 5);
+val_acc = A(2:5:end, 5);
+train_loss = A(1:5:end, 3);
+val_loss = A(2:5:end, 3);
+
+
+epoch = 5:93;
+figure
+plot(epoch, train_loss, 'LineWidth', 1, 'Color', 'b')
+hold on
+plot(epoch, val_loss, 'LineWidth', 1, 'Color', 'r')
+randomguess_loss = log(num_classes)

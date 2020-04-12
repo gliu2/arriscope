@@ -3,7 +3,7 @@
 % Purpose:  
 %   Use the raw ARRI RGB sensor values captured under 6 different
 %   lights to estimate surface reflectance.  We illustrate with MCC.
-%   (ultimately, we wish to estimate reflectances for tissue.
+%   (Ultimately, we wish to estimate reflectances for tissue.)
 %
 %   We will use measured tissue reflectances, although it is also possible
 %   to predict tissue reflectances if we know the absorbance and scattering
